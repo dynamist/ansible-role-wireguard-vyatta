@@ -1,0 +1,79 @@
+---
+- name: Gather facts for play
+  setup:
+
+- name: Get installed wireguard version (if available)
+  shell: |
+    dpkg -l | awk -F[.-] '/wireguard/ {print $3}'
+  when: ansible_os_family == "Debian"
+  register: wg_installed
+
+- name: Get OS version
+  command: cat /etc/version
+  register: os_version
+
+- name: Set variables
+  set_fact:
+    os_binary: "{{ os_version.stdout.split('.')[1].split('-')[1] }}"
+    wg_release: "{{ wireguard_release.split('.')[2].split('-')[0] }}"
+    router_version: "{{ os_version.stdout.split('.')[2] }}"
+
+- name: Get github release data
+  uri:
+    url: "{{ wireguard_url }}"
+    return_content: no
+  when: wg_installed.stdout < wg_release
+  register: download_url
+
+- name: Set download url for router os v1 or USG
+  vars:
+    browser_url_query: "[].assets[?name=='wireguard-{{ wireguard_hardware[os_binary] }}-{{ wireguard_release }}.deb'].browser_download_url"
+  set_fact:
+    browser_url: "{{ download_url.json | json_query(browser_url_query) | select | list | flatten }}"
+  when: 
+    - download_url is changed
+    - router_version is version('v2', '!=')
+
+- name: Set download url for router os v2
+  vars:
+    browser_url_query: "[].assets[?name=='wireguard-v2.0-{{ wireguard_hardware[os_binary] }}-{{ wireguard_release }}.deb'].browser_download_url"
+  set_fact:
+    browser_url: "{{ download_url.json | json_query(browser_url_query) | select | list | flatten }}"
+  when: 
+    - download_url is changed
+    - router_version is version('v2', '==')
+
+- name: Download wireguard release
+  get_url:
+    dest: /tmp/wireguard-package.deb
+    url: "{{ browser_url[0] }}"
+  when: browser_url is defined
+
+- name: Install wireguard package
+  shell: dpkg -i /tmp/wireguard-package.deb
+  when: 
+    - browser_url is defined
+    - ansible_os_family == "Debian"
+  become: yes
+
+- name: Create wireguard config directory
+  file:
+    path: "{{ wireguard_config_dir }}"
+    state: directory
+  become: yes
+
+- name: Create wireguard private key
+  shell: "wg genkey > {{ item.interface }}.key"
+  args:
+    creates: "{{ item.interface }}.key"
+    chdir: "{{ wireguard_config_dir }}/"
+  loop: "{{ wireguard_wg_interfaces | flatten(levels=1) }}"
+  become: yes
+  
+- name: Create wireguard public key
+  shell: "wg pubkey < {{ item.interface }}.key > {{ item.interface }}.pub"
+  args:
+    creates: "{{ item.interface }}.pub"
+    chdir: "{{ wireguard_config_dir }}/"
+  loop: "{{ wireguard_wg_interfaces | flatten(levels=1) }}"
+  become: yes

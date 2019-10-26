@@ -1,0 +1,10 @@
+---
+- name: Install wireguard
+  include_tasks: install.yml
+  when:
+    - wireguard_install
+
+- name: Configure wireguard
+  include_tasks: cli-config.yml
+  when:
+    - wireguard_configure

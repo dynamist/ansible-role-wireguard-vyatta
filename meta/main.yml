@@ -1,0 +1,18 @@
+dependencies: []
+
+galaxy_info:
+  author: rholmboe
+  description: Vyatta role for installing and maintaining wireguard interface(s)
+  company: "Dynamist AB"
+  issue_tracker_url: https://github.com/dynamist/issues
+  license: Apache
+  min_ansible_version: 2.7
+
+  galaxy_tags:
+    - vyatta
+    - edgeos
+    - vyos
+    - vpn
+    - wireguard
+    - network
+    - networking

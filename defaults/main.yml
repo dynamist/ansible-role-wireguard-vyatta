@@ -1,0 +1,24 @@
+---
+# defaults file for ansible-role-wireguard-vyatta
+
+wireguard_url: https://api.github.com/repos/Lochnair/vyatta-wireguard/releases
+wireguard_release: 0.0.20191012-1
+wireguard_config_dir: /config/wireguard
+
+wireguard_hardware:
+  e50: e50
+  e100: e100
+  e120: ugw3
+  e200: e200
+  e300: e300
+  e1000: e1000
+
+wireguard_wg_interfaces: []
+  # - interface: wg0
+  #   description: "VPN clients"
+  #   address: 192.168.58.1/24
+  #   port: 51820
+  #   peer:
+  #     - id: "AAAAAAAAAABBBBBBBBBBCCCCCCCCCCCCDDDDDDDDDDD="
+  #       description: "peer 1"
+  #       allowed_ips: 192.168.53.101/32

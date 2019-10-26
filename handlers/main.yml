@@ -1,0 +1,2 @@
+---
+# handlers not needed, since vyatta restarts service on changes
