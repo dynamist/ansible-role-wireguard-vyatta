@@ -1,14 +1,14 @@
 ansible-role-wireguard-vyatta
 =========
 
-A simple role to install wireguard deb package on vyatta based routers
-and to configure peers
+A simple role to install Wireguard DEB package on Vyatta based routers and to configure peers
 
 Currently only supports EdgeOS
 
-To both do installations and configure, playbook must be defined with two entries
-First one is to do actual binary installment using regular SSH
-Second one is to configure vyatta using networking module
+To do both do installation and configuration, the playbook must be defined with two entries:
+
+- First is to install the executable using regular SSH (`wireguard_install`)
+- Second is to configure Vyatta using networking module (`wireguard_configure`)
 
 Requirements
 ------------
@@ -36,7 +36,7 @@ Example Playbook
 
 Playbook to run against EdgeOS routers.
 
-```
+```yaml
 ---
 - name: EdgeOS wireguard install
   hosts: routers
