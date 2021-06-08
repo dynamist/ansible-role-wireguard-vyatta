@@ -1,0 +1,28 @@
+---
+- name: Gather facts for play
+  edgeos_facts:
+    gather_subset: "!config"
+
+- name: Configure wireguard client interface settings
+  edgeos_config:
+    lines:
+      - "set interfaces wireguard {{ item.interface }} address {{ item.address }}"
+      - "set interfaces wireguard {{ item.interface }} private-key {{ item.privkey }}"
+      - "set interfaces wireguard {{ item.interface }} description '{{ item.description }}'"
+  loop: "{{ wireguard_wg_interfaces | flatten(levels=1) }}"
+  loop_control:
+    label: "{{ item.interface }}"
+  when: ("EdgeRouter" in ansible_facts['net_model']) or
+        ("UniFi" in ansible_facts['net_model'])
+
+- name: Configure wireguard client peer
+  edgeos_config:
+    lines:
+      - "set interfaces wireguard {{ item.0.interface }} peer {{ item.1.id }} description {{ item.1.description }}"
+      - "set interfaces wireguard {{ item.0.interface }} peer {{ item.1.id }} allowed-ips {{ item.1.allowed_ips }}"
+      - "set interfaces wireguard {{ item.0.interface }} peer {{ item.1.id }} endpoint {{ item.1.endpoint }}"
+  loop: "{{ wireguard_wg_interfaces | subelements('peer') }}"
+  loop_control:
+    label: "{{ item.1.description }}"
+  when: ("EdgeRouter" in ansible_facts['net_model']) or
+        ("UniFi" in ansible_facts['net_model'])

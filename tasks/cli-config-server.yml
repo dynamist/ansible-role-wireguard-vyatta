@@ -3,7 +3,7 @@
   edgeos_facts:
     gather_subset: "!config"
 
-- name: Configure basic wireguard settings
+- name: Configure wireguard server interface settings
   edgeos_config:
     lines:
       - "set interfaces wireguard {{ item.interface }} address {{ item.address }}"
@@ -16,7 +16,7 @@
   when: ("EdgeRouter" in ansible_facts['net_model']) or
         ("UniFi" in ansible_facts['net_model'])
 
-- name: Configure wireguard peers
+- name: Configure wireguard server peer(s)
   edgeos_config:
     lines:
       - "set interfaces wireguard {{ item.0.interface }} peer {{ item.1.id }} description {{ item.1.description }}"
