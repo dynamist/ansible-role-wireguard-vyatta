@@ -3,6 +3,16 @@
   edgeos_facts:
     gather_subset: "!config"
 
+- name: Delete existing interface(s)
+  edgeos_config:
+    lines:
+      - "delete interfaces wireguard {{ item.interface }}"
+  loop: "{{ wireguard_wg_interfaces | flatten(levels=1) }}"
+  loop_control:
+    label: "{{ item.interface }}"
+  when: ("EdgeRouter" in ansible_facts['net_model']) or
+        ("UniFi" in ansible_facts['net_model'])
+
 - name: Configure wireguard client interface settings
   edgeos_config:
     lines:
@@ -22,7 +32,9 @@
       - "set interfaces wireguard {{ item.0.interface }} peer {{ item.1.id }} allowed-ips {{ item.1.allowed_ips }}"
       - "set interfaces wireguard {{ item.0.interface }} peer {{ item.1.id }} endpoint {{ item.1.endpoint }}"
   loop: "{{ wireguard_wg_interfaces | subelements('peer') }}"
+  # include_tasks: allowed-ips.yml
   loop_control:
     label: "{{ item.1.description }}"
   when: ("EdgeRouter" in ansible_facts['net_model']) or
         ("UniFi" in ansible_facts['net_model'])
+
