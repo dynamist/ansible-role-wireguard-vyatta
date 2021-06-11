@@ -29,7 +29,9 @@ Role Variables
 Dependencies
 ------------
 
-`ansible-galaxy collection install community.network`
+Install using:
+
+- `ansible-galaxy -r requirements.yaml install`
 
 Example Playbook
 ----------------
