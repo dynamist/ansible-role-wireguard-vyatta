@@ -6,7 +6,7 @@
   shell: |
     dpkg -l | awk -F[.-] '/wireguard/ {print $3}'
   when: ansible_os_family == "Debian"
-  register: wg_installed
+  register: wg_installed_os
 
 - name: Get OS version
   command: cat /etc/version
@@ -16,13 +16,14 @@
   set_fact:
     os_binary: "{{ os_version.stdout.split('.')[1].split('-')[1] }}"
     wg_release: "{{ wireguard_release.split('.')[2].split('-')[0] }}"
+    wg_installed: "{{ wg_installed_os.stdout | default('0.0.0') }}"
     router_version: "{{ os_version.stdout.split('.')[2] }}"
 
 - name: Get github release data
   uri:
     url: "{{ wireguard_url }}"
     return_content: no
-  when: wg_installed.stdout < wg_release
+  when: wg_installed < wg_release
   register: download_url
 
 - name: Set download url for router os v1 or USG
@@ -68,6 +69,8 @@
     creates: "{{ item.interface }}.key"
     chdir: "{{ wireguard_config_dir }}/"
   loop: "{{ wireguard_wg_interfaces | flatten(levels=1) }}"
+  loop_control:
+    label: "{{ item.interface }}"
   become: yes
   
 - name: Create wireguard public key
@@ -76,4 +79,6 @@
     creates: "{{ item.interface }}.pub"
     chdir: "{{ wireguard_config_dir }}/"
   loop: "{{ wireguard_wg_interfaces | flatten(levels=1) }}"
+  loop_control:
+    label: "{{ item.interface }}"
   become: yes
