@@ -1,8 +1,8 @@
 ---
 # defaults file for ansible-role-wireguard-vyatta
 
-wireguard_url: https://api.github.com/repos/Lochnair/vyatta-wireguard/releases
-wireguard_release: 0.0.20191012-1
+wireguard_url: https://api.github.com/repos/WireGuard/wireguard-vyatta-ubnt/releases
+wireguard_release: 1.0.20210424-1
 wireguard_config_dir: /config/wireguard
 
 wireguard_hardware:

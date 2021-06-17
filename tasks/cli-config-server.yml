@@ -1,0 +1,41 @@
+---
+- name: Gather facts for play
+  edgeos_facts:
+    gather_subset: "!config"
+
+- name: Delete existing interface(s)
+  edgeos_config:
+    lines:
+      - "delete interfaces wireguard {{ item.interface }}"
+  loop: "{{ wireguard_wg_interfaces | flatten(levels=1) }}"
+  loop_control:
+    label: "{{ item.interface }}"
+  when: ("EdgeRouter" in ansible_facts['net_model']) or
+        ("UniFi" in ansible_facts['net_model'])
+
+- name: Configure wireguard server interface settings
+  edgeos_config:
+    lines:
+      - "set interfaces wireguard {{ item.interface }} address {{ item.address }}"
+      - "set interfaces wireguard {{ item.interface }} listen-port {{ item.port }}"
+      - "set interfaces wireguard {{ item.interface }} private-key {{ wireguard_config_dir }}/{{ item.interface }}.key"
+      - "set interfaces wireguard {{ item.interface }} description '{{ item.description }}'"
+  loop: "{{ wireguard_wg_interfaces | flatten(levels=1) }}"
+  loop_control:
+    label: "{{ item.interface }}"
+  when: ("EdgeRouter" in ansible_facts['net_model']) or
+        ("UniFi" in ansible_facts['net_model'])
+
+- name: Configure wireguard server peer(s)
+  edgeos_config:
+    lines:
+      - "set interfaces wireguard {{ item.0.interface }} peer {{ item.1.id }} description {{ item.1.description }}"
+      - "set interfaces wireguard {{ item.0.interface }} peer {{ item.1.id }} allowed-ips {{ item.1.allowed_ips }}"
+  loop: "{{ wireguard_wg_interfaces | subelements('peer') }}"
+  loop_control:
+    label: "{{ item.1.description }}"
+  when: ("EdgeRouter" in ansible_facts['net_model']) or
+        ("UniFi" in ansible_facts['net_model'])
+
+#TODO(RH:firewall)
+# - name: Configure wireguard firewall rules

@@ -4,7 +4,12 @@
   when:
     - wireguard_install
 
-- name: Configure wireguard
-  include_tasks: cli-config.yml
+- name: Configure wireguard server
+  include_tasks: cli-config-server.yml
   when:
-    - wireguard_configure
+    - wireguard_configure == "server"
+
+- name: Configure wireguard client
+  include_tasks: cli-config-client.yml
+  when:
+    - wireguard_configure == "client"

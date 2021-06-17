@@ -18,9 +18,9 @@ Vyatta based units (Vyatta, EdgeOS, VyOS)
 Role Variables
 --------------
 
-`wireguard_url` (default: `https://api.github.com/repos/Lochnair/vyatta-wireguard/releases`)
+`wireguard_url` (default: `https://api.github.com/repos/WireGuard/wireguard-vyatta-ubnt/releases`)
 
-`wireguard_release` (default: `0.0.20191012-1`)
+`wireguard_release` (default: `1.0.20210424-1`)
 
 `wireguard_config_dir` (default: `/config/wireguard`)
 
@@ -28,8 +28,16 @@ Role Variables
 
 Dependencies
 ------------
+requirements.yaml:
 
-None
+```yaml---
+collections:
+- community.network
+```
+
+Install using:
+
+- `ansible-galaxy collection install -r requirements.yaml`
 
 Example Playbook
 ----------------
@@ -54,16 +62,18 @@ Playbook to run against EdgeOS routers.
   vars:
     ansible_network_os: edgeos
     wireguard_install: false
-    wireguard_configure: true
+    wireguard_configure: "server"  # change to "client" for client
     wireguard_wg_interfaces:
       - interface: wg0
         description: "VPN Clients"
         address: 192.168.58.1/24
-        port: 51820
+        # privkey: <private key> assign private key with a variable instead of a file for client
+        port: 51820 # client doesn't use port
         peer:
           - id: "AAAAAAAAAABBBBBBBBBBCCCCCCCCCCCCDDDDDDDDDDD="
             description: "peer 1"
             allowed_ips: 192.168.53.101/32
+            # endpoint: <IP of server>:<port>  # client needs an endpoint as well
   roles:
     - ansible-role-wireguard-vyatta
 ```
